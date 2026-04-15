@@ -51,18 +51,59 @@ const PLANT_DATA = [
 const state = {
     plants: [],
     filteredPlants: [],
-    filter: ''
+    filter: '',
+    isLoading: false,
+    useApi: false,
+    apiKey: ''
 };
 
-function init() {
-    loadPlants();
+async function init() {
     setupEventListeners();
+    await loadPlants();
 }
 
-function loadPlants() {
-    state.plants = PLANT_DATA;
-    state.filteredPlants = [...PLANT_DATA];
+async function loadPlants() {
+    setLoading(true);
+    
+    try {
+        if (state.useApi && state.apiKey) {
+            const apiData = await fetchPlantsFromApi(state.apiKey);
+            if (apiData.data && apiData.data.length > 0) {
+                state.plants = apiData.data.map(transformApiData);
+            } else {
+                state.plants = PLANT_DATA;
+            }
+        } else {
+            state.plants = PLANT_DATA;
+        }
+    } catch (error) {
+        console.error('Error loading plants:', error);
+        state.plants = PLANT_DATA;
+    }
+    
+    state.filteredPlants = [...state.plants];
+    setLoading(false);
     renderPlants();
+}
+
+function transformApiData(apiPlant) {
+    return {
+        id: apiPlant.id,
+        name: apiPlant.common_name || 'Unknown',
+        scientific_name: apiPlant.scientific_name?.[0] || 'Unknown',
+        description: apiPlant.default_image?.license_name || 'No description available',
+        sunlight: Array.isArray(apiPlant.sunlight) ? apiPlant.sunlight.join(', ') : 'Unknown',
+        watering: apiPlant.watering || 'Unknown',
+        category: 'API'
+    };
+}
+
+function setLoading(loading) {
+    state.isLoading = loading;
+    const plantList = document.getElementById('plant-list');
+    if (plantList) {
+        plantList.innerHTML = loading ? '<p>Loading plants...</p>' : '';
+    }
 }
 
 function setupEventListeners() {

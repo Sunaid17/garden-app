@@ -33,12 +33,5 @@ jobs:
         test -f js/store.js
         test -f js/plantService.js
 
-    - name: Check JS syntax with node
-      run: |
-        for f in js/*.js; do
-          node --check "$f" 2>/dev/null || true
-        done
-        echo "Note: ES module imports require browser to run"
-
     - name: List project files
       run: ls -la

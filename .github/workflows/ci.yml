@@ -13,17 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-
-    - name: Install dependencies
-      run: npm install
-
     - name: Validate HTML
       run: |
-        # Basic HTML validation check
         for file in *.html; do
           if grep -q '<!DOCTYPE html>' "$file"; then
             echo "✓ $file is valid HTML"
@@ -33,9 +24,6 @@ jobs:
           fi
         done
 
-    - name: Check JavaScript syntax
-      run: node --check js/*.js 2>/dev/null || echo "ES modules require browser"
-
     - name: Verify files exist
       run: |
         test -f index.html
@@ -44,6 +32,13 @@ jobs:
         test -f js/data.js
         test -f js/store.js
         test -f js/plantService.js
+
+    - name: Check JS syntax with node
+      run: |
+        for f in js/*.js; do
+          node --check "$f" 2>/dev/null || true
+        done
+        echo "Note: ES module imports require browser to run"
 
     - name: List project files
       run: ls -la

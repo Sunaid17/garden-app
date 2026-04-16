@@ -74,6 +74,7 @@ function subscribeToStore() {
 
 function renderPlants() {
     const plantList = document.getElementById('plant-list');
+    const plantCount = document.getElementById('plant-count');
     if (!plantList) return;
 
     const state = plantStore.getState();
@@ -81,6 +82,12 @@ function renderPlants() {
     if (state.isLoading) {
         plantList.innerHTML = '<p>Loading plants...</p>';
         return;
+    }
+
+    if (plantCount) {
+        const total = state.plants.length;
+        const shown = state.filteredPlants.length;
+        plantCount.textContent = `Showing ${shown} of ${total} plants`;
     }
 
     if (state.filteredPlants.length === 0) {
